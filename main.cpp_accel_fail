@@ -1,0 +1,130 @@
+#include "mbed.h"
+// #include "SEGGER_RTT.h"
+#include "LIS3DH.h"
+// #include "sensors-lib/sensor_type.h"
+#include "conversions.h"
+ Serial sd(USBTX, USBRX); // tx, rx
+// #include "tmp75.h"
+// #define TMP75_ADDR      0x4B
+
+// const PinName i2c_data_pin = PinName::PB_9;
+// const PinName i2c_clk_pin = PinName::PB_6;
+// const PinName alert_pin=PinName::PD_10,
+// Serial sd(USBTX, USBRX); // tx, rx
+// int main(){
+//      Tmp75 onboard_temp_sensor(i2c_data_pin, i2c_clk_pin);
+//     onboard_temp_sensor.Enable();
+//     std::vector<std::pair<std::string, std::string>> s_data;
+
+//     int stat = onboard_temp_sensor.GetData(s_data);
+//     sd.printf("get data %d\r\n",stat);
+//             if (stat == SensorType::DATA_NOT_RDY || stat == SensorType::DATA_CRC_ERR)
+//             {
+//                sd.printf("wrong  \r\n");
+//             }
+                
+//             if (stat == SensorType::DATA_OK)
+//             {  
+//                     sd.printf("data ok \r\n");
+//             }
+// }
+// #define TMP75_I2C_ADDR			0x96
+
+// #define TMP75_RESOLUTION			0.0625
+// const PinName i2c_data_pin = PinName::PB_9;
+// const PinName i2c_clk_pin = PinName::PB_6;
+// const PinName alert_pin=PinName::PD_10;
+//         std::string ConvertDataToString(float data)
+//         {
+//             char buf[32];
+//             std::string data_str = DoubleToChar(buf, data, 2);
+//             return data_str;
+//         }
+
+//     int main(){
+//         I2C i2c(i2c_data_pin , i2c_clk_pin ); 
+//         char i2cbuff[4];
+//         i2cbuff[0] = 0x00;
+//         while(1){
+//             int res = i2c.write(TMP75_I2C_ADDR, i2cbuff, 1, false);
+//             res = i2c.read(TMP75_I2C_ADDR, i2cbuff, 2, false);
+//             uint16_t stat = (i2cbuff[0] << 8 | i2cbuff[1]);
+// 	        float temp_data_ = (stat >> 4) * TMP75_RESOLUTION;
+//             std::string amb_temp = ConvertDataToString(temp_data_);
+//             char cstr[amb_temp.size()+1];
+//             strcpy(cstr,amb_temp.c_str());
+//             sd.printf("%s\r\n", cstr);
+//             wait(0.5);
+//         }
+
+//     }
+// main() runs in its own thread in the OS
+// I2C i2c(I2C_SDA , I2C_SCL ); 
+
+// const int addr7bit = 0x48;      // 7 bit I2C address
+// const int addr8bit = 0x93; // 8bit I2C address, 0x90
+
+// int main() {
+//     char cmd[2];
+//     while (1) {
+//         cmd[0] = 0x01;
+//         cmd[1] = 0x00;
+//         i2c.write(addr8bit, cmd, 2);
+ 
+//         wait(0.5);
+ 
+//         // cmd[0] = 0x00;
+//         // i2c.write(addr8bit, cmd, 1);
+//         i2c.read( addr8bit, cmd, 2);
+ 
+//         // float tmp = (float((cmd[0]<<8)|cmd[1]) / 256.0);
+//         sd.printf("Temp = %d%d\n", cmd[0],cmd[1]);
+//     }
+// }
+    const PinName i2c_data_pin = PinName::PB_9;
+    const PinName i2c_clk_pin = PinName::PB_6;
+    const PinName alert_pin=PinName::PD_10;
+    I2C i2c(i2c_data_pin , i2c_clk_pin ); 
+
+    int main() {
+    //  I2C i2c(p19,p18);
+             // SDA, SCL
+    LIS3DH acc(i2c, 0x3c, LIS3DH_DR_NR_LP_50HZ, LIS3DH_FS_8G);
+    
+    
+        // SEGGER_RTT_printf(0, "dev id is %d \n", acc.read_id());  
+        //
+        // sd.printf("Hello1\r\n");
+        // i2c.frequency(400000);
+        // int temp= 0x00;
+        // while(1){
+        //     char dt[2];
+        //     dt[0] = 0x0f;
+            
+        //     i2c.write(temp, dt, 1, true);
+        //     i2c.read(temp, dt, 1, false);
+           
+        //     int x=(uint8_t)dt[0];
+        //     sd.printf("%02x\t%02x\r\n", x,temp);
+        //     wait(0.5);
+        //     temp++;
+        // }
+    
+        while(1) {
+            int x =acc.read_id();
+            // if (x == I_AM_LIS3DH){
+            float f[3];
+            acc.read_data(f);
+            sd.printf("%02x\r\n", x);
+            sd.printf("%f\r\n", f[0]);
+            sd.printf("%f\r\n", f[1]);
+            sd.printf("%f\r\n", f[2]);
+            sd.printf("Hello\r\n");
+            
+            // }    else  {
+            //     sd.printf("failed%x\r\n",x);
+            // }
+        wait(0.5);
+        }
+    }
+ 

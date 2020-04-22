@@ -1,0 +1,37 @@
+#include "mbed.h"
+
+#include "LIS3DH.h"
+
+#include "conversions.h"
+ Serial sd(USBTX, USBRX); // tx, rx
+
+#define TMP75_I2C_ADDR			0x96
+
+#define TMP75_RESOLUTION			0.0625
+const PinName i2c_data_pin = PinName::PB_9;
+const PinName i2c_clk_pin = PinName::PB_6;
+const PinName alert_pin=PinName::PD_10;
+        std::string ConvertDataToString(float data)
+        {
+            char buf[32];
+            std::string data_str = DoubleToChar(buf, data, 2);
+            return data_str;
+        }
+
+    int main(){
+        I2C i2c(i2c_data_pin , i2c_clk_pin ); 
+        char i2cbuff[4];
+        i2cbuff[0] = 0x00;
+        while(1){
+            int res = i2c.write(TMP75_I2C_ADDR, i2cbuff, 1, false);
+            res = i2c.read(TMP75_I2C_ADDR, i2cbuff, 2, false);
+            uint16_t stat = (i2cbuff[0] << 8 | i2cbuff[1]);
+	        float temp_data_ = (stat >> 4) * TMP75_RESOLUTION;
+            std::string amb_temp = ConvertDataToString(temp_data_);
+            char cstr[amb_temp.size()+1];
+            strcpy(cstr,amb_temp.c_str());
+            sd.printf("%s\r\n", cstr);
+            wait(0.5);
+        }
+
+    }
